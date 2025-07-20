@@ -1,0 +1,8 @@
+packages:
+  ac: !include configs/base.ac.yaml
+  base: !include configs/base.yaml
+
+substitutions:
+  friendly_name: Matt Bedroom AC
+  ip_address: 10.1.1.168
+  name: matt-bedroom-ac

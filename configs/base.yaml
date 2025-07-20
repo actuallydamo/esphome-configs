@@ -1,0 +1,46 @@
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+# Easy remote reboot
+button:
+  - platform: restart
+    entity_category: diagnostic
+    name: Restart
+
+esphome:
+  friendly_name: $friendly_name
+  name: $name
+
+# Enable logging
+logger:
+
+# Enable Over-The-Air updates
+ota:
+  - password: !secret ota_password
+    platform: esphome
+
+# Check how long the device has been running
+sensor:
+  - platform: uptime
+    entity_category: diagnostic
+    name: Uptime
+    type: seconds
+
+substitutions:
+  fallback_name: $name Fallback
+
+# Setup WiFi connection and fallback AP
+wifi:
+  ap:
+    password: !secret fallback_psk
+    ssid: $fallback_name
+  manual_ip:
+    dns1: 10.1.1.209
+    gateway: 10.1.1.1
+    static_ip: $ip_address
+    subnet: 255.255.255.0
+  password: !secret psk
+  ssid: !secret ssid

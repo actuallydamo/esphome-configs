@@ -1,0 +1,8 @@
+packages:
+  ac: !include configs/base.ac.yaml
+  base: !include configs/base.yaml
+
+substitutions:
+  friendly_name: Office AC
+  ip_address: 10.1.1.181
+  name: office-ac
