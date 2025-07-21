@@ -1,0 +1,128 @@
+# Inkbird IAM-T1 CO2 sensor package
+# This package provides a template for the Inkbird IAM-T1 environmental sensor
+# which measures temperature, humidity, CO2, and air pressure via BLE
+
+# Required substitutions:
+# - mac_address: The BLE MAC address of the Inkbird IAM-T1 device
+# - sub_device_area_id: The area ID for the device
+# - sub_device_friendly_name: The friendly name for the device
+# - sub_device_name: The slug for the device
+
+esphome:
+  devices:
+    - area_id: ${sub_device_area_id}
+      id: ${sub_device_name}_device
+      name: ${sub_device_friendly_name}
+
+ble_client:
+  - mac_address: ${mac_address}
+    id: ${sub_device_name}_client
+    on_connect:
+      then:
+        - lambda: ESP_LOGD("ble_client_lambda", "Connected to ${sub_device_friendly_name} Inkbird BLE device");
+
+sensor:
+  # Temperature
+  - platform: ble_client
+    state_class: measurement
+    ble_client_id: ${sub_device_name}_client
+    device_id: ${sub_device_name}_device
+    name: ${sub_device_friendly_name} Temperature
+    device_class: temperature
+    icon: mdi:temperature-celsius
+    unit_of_measurement: °C
+    accuracy_decimals: 1
+    service_uuid: ffe0
+    characteristic_uuid: ffe4
+    notify: true
+    type: characteristic
+    lambda: |-
+      if (x[0] != 0x55 && (x[4] & 0xf0) != 0) {
+        return NAN;
+      }
+      const bool is_negative = ((x[4] & 0x0f) != 0);
+      float temp = float((x[5] << 8) | x[6]) / 10.0;
+      if (is_negative)
+        temp = -temp;
+      return temp;
+    filters:
+      - clamp:
+          # Below 0 reports but is inaccurate
+          # min_value: 0
+          max_value: 50
+          ignore_out_of_range: true
+
+  # Humidity
+  - platform: ble_client
+    ble_client_id: ${sub_device_name}_client
+    device_id: ${sub_device_name}_device
+    name: ${sub_device_friendly_name} Humidity
+    device_class: humidity
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    accuracy_decimals: 0
+    service_uuid: ffe0
+    characteristic_uuid: ffe4
+    notify: true
+    type: characteristic
+    lambda: |-
+      if (x[0] != 0x55 && (x[4] & 0xf0) != 0) {
+        return NAN;
+      }
+      uint16_t humidity = (x[7] << 8) | x[8];
+      return ((float)humidity) / 10.0;
+    filters:
+      - clamp:
+          min_value: 0
+          max_value: 85
+          ignore_out_of_range: true
+
+  # Carbon Dioxide CO2
+  - platform: ble_client
+    ble_client_id: ${sub_device_name}_client
+    device_id: ${sub_device_name}_device
+    name: ${sub_device_friendly_name} CO2
+    device_class: carbon_dioxide
+    icon: mdi:molecule-co2
+    unit_of_measurement: ppm
+    accuracy_decimals: 0
+    service_uuid: ffe0
+    characteristic_uuid: ffe4
+    notify: true
+    type: characteristic
+    lambda: |-
+      if (x[0] != 0x55 && (x[4] & 0xf0) != 0) {
+        return NAN;
+      }
+      uint16_t co2 = (x[9] << 8) | x[10];
+      return (float)co2;
+    filters:
+      - clamp:
+          min_value: 0
+          max_value: 9999
+          ignore_out_of_range: true
+
+  # Air Pressure hPa
+  - platform: ble_client
+    ble_client_id: ${sub_device_name}_client
+    device_id: ${sub_device_name}_device
+    name: ${sub_device_friendly_name} Air Pressure
+    device_class: atmospheric_pressure
+    unit_of_measurement: hPa
+    accuracy_decimals: 0
+    icon: mdi:gauge
+    service_uuid: ffe0
+    characteristic_uuid: ffe4
+    notify: true
+    type: characteristic
+    lambda: |-
+      if (x[0] != 0x55 && (x[4] & 0xf0) != 0) {
+        return NAN;
+      }
+      uint16_t pressure = (x[11] << 8) | x[12];
+      return (float)pressure;
+    filters:
+      - clamp:
+          min_value: 600
+          max_value: 1100
+          ignore_out_of_range: true

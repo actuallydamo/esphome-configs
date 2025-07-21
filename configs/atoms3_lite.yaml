@@ -1,0 +1,28 @@
+binary_sensor:
+  - filters:
+      - delayed_off: 10ms
+    name: Button
+    on_press:
+      then:
+        - logger.log: Button Pressed
+    pin:
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+      number: GPIO41
+    platform: gpio
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+light:
+  - chipset: ws2812
+    id: led
+    name: Led
+    num_leds: 4
+    pin: 35
+    platform: esp32_rmt_led_strip
+    rgb_order: GRB

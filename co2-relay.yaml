@@ -1,0 +1,29 @@
+packages:
+  atoms3_lite: !include configs/atoms3_lite.yaml
+  base: !include configs/base.yaml
+  landing_iam_t1: !include
+    file: configs/inkbird_iam_t1.yaml
+    vars:
+      mac_address: !secret iam_t1_landing_mac
+      sub_device_area_id: landing_area
+      sub_device_friendly_name: Landing IAM-T1
+      sub_device_name: iam_t1_landing
+  main_bedroom_iam_t1: !include
+    file: configs/inkbird_iam_t1.yaml
+    vars:
+      mac_address: !secret iam_t1_main_bedroom_mac
+      sub_device_area_id: main_bedroom_area
+      sub_device_friendly_name: Main Bedroom IAM-T1
+      sub_device_name: iam_t1_main_bedroom
+
+substitutions:
+  name: co2-relay
+  friendly_name: CO2 Relay
+  ip_address: 10.1.1.244
+
+esphome:
+  areas:
+    - id: landing_area
+      name: Landing
+    - id: main_bedroom_area
+      name: Main Bedroom
