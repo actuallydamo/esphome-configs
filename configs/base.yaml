@@ -19,7 +19,8 @@ logger:
 
 # Enable Over-The-Air updates
 ota:
-  - password: !secret ota_password
+  - id: esp_home_ota
+    password: !secret ota_password
     platform: esphome
 
 # Check how long the device has been running
