@@ -28,4 +28,5 @@ light:
     rgb_order: GRB
 
 packages:
+  base: !include base.yaml
   wifi: !include wifi.yaml

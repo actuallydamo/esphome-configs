@@ -1,6 +1,5 @@
 packages:
   atoms3_lite: !include configs/atoms3_lite.yaml
-  base: !include configs/base.yaml
   landing_iam_t1: !include
     file: configs/inkbird_iam_t1.yaml
     vars:
