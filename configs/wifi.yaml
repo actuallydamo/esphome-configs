@@ -1,0 +1,11 @@
+substitutions:
+  fallback_name: $name Fallback
+
+# Setup WiFi connection and fallback AP
+wifi:
+  ap:
+    password: !secret fallback_psk
+    ssid: $fallback_name
+  manual_ip: $manual_ip
+  password: !secret psk
+  ssid: !secret ssid

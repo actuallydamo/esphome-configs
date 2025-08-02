@@ -1,6 +1,7 @@
 packages:
   ac: !include configs/base.ac.yaml
   base: !include configs/base.yaml
+  d1_mini: !include configs/d1_mini.yaml
 
 substitutions:
   friendly_name: Main Bedroom AC

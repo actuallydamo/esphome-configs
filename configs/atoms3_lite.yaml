@@ -26,3 +26,6 @@ light:
     pin: 35
     platform: esp32_rmt_led_strip
     rgb_order: GRB
+
+packages:
+  wifi: !include wifi.yaml
