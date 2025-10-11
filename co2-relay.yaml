@@ -14,6 +14,13 @@ packages:
       sub_device_area_id: main_bedroom_area
       sub_device_friendly_name: Main Bedroom IAM-T1
       sub_device_name: iam_t1_main_bedroom
+  office_iam_t1: !include
+    file: configs/inkbird_iam_t1.yaml
+    vars:
+      mac_address: !secret iam_t1_office_mac
+      sub_device_area_id: office_area
+      sub_device_friendly_name: Office IAM-T1
+      sub_device_name: iam_t1_office
 
 substitutions:
   friendly_name: CO2 Relay
@@ -26,3 +33,5 @@ esphome:
       name: Landing
     - id: main_bedroom_area
       name: Main Bedroom
+    - id: office_area
+      name: Office
