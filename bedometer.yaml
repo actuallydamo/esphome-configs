@@ -1,0 +1,61 @@
+packages:
+  atoms3_lite: !include configs/atoms3_lite.yaml
+
+substitutions:
+  friendly_name: Bedometer
+  ip_address: 10.1.1.213
+  name: bedometer
+  threshold: 0.5
+
+ads1115:
+  - address: 0x48
+
+.binary_sensor:
+  - &base_occupancy_sensor
+    device_class: occupancy
+    filters:
+      - delayed_off: 10s
+    platform: template
+
+binary_sensor:
+  - !!merge <<: *base_occupancy_sensor
+    id: bed_left_occupancy
+    lambda: return id(bed_left_pressure).state > $threshold;
+    name: Bed Left Occupancy
+  - !!merge <<: *base_occupancy_sensor
+    id: bed_right_occupancy
+    lambda: return id(bed_right_pressure).state > $threshold;
+    name: Bed Right Occupancy
+  - !!merge <<: *base_occupancy_sensor
+    filters:
+      - delayed_off: 0s
+    id: bed_occupancy
+    lambda: return id(bed_left_occupancy).state || id(bed_right_occupancy).state;
+    name: Bed Occupancy
+
+i2c:
+  id: i2c_bus
+  scl: GPIO6
+  sda: GPIO5
+
+.sensor:
+  - &base_pressure_sensor
+    entity_category: diagnostic
+    filters:
+      - lambda: 'return x <= 0.1 ? 0.0 : x;'
+      - or:
+          - heartbeat: 1min
+          - delta: 0.1
+    gain: 4.096
+    platform: ads1115
+    update_interval: 1s
+
+sensor:
+  - !!merge <<: *base_pressure_sensor
+    id: bed_left_pressure
+    multiplexer: A0_GND
+    name: Left
+  - !!merge <<: *base_pressure_sensor
+    id: bed_right_pressure
+    multiplexer: A1_GND
+    name: Right
