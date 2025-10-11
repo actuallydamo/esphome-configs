@@ -1,0 +1,155 @@
+packages:
+  base: !include configs/base.yaml
+  c6: !include configs/c6.yaml
+
+substitutions:
+  friendly_name: Wimdy
+  ip_address: 10.1.1.180
+  name: wimdy
+
+binary_sensor:
+  - name: Dial button
+    on_release:
+      - fan.toggle: fan_device
+    pin:
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+      number: GPIO2
+    platform: gpio
+
+external_components:
+  - components:
+      - mcp414x
+    source:
+      type: git
+      url: https://git.ellis.codes/e/esphome-mcp414x
+
+fan:
+  - id: fan_device
+    mcp414x_id: digipot # References the MCP414X component
+    name: Fan
+    platform: mcp414x
+    speed_count: 100 # Number of speed levels (1-100)
+
+light:
+  - id: status_light
+    output: status_output
+    platform: status_led
+  - chipset: ws2812
+    id: led
+    name: LED
+    num_leds: 1
+    pin: GPIO21
+    platform: esp32_rmt_led_strip
+    rgb_order: GRB
+
+logger:
+  hardware_uart: UART0
+  level: WARN
+
+mcp414x:
+  - cs_pin: GPIO18
+    id: digipot
+    initial_value: 0
+    internal: true
+    name: Digital Potentiometer
+
+output:
+  - id: status_output
+    platform: template
+    type: binary
+    write_action:
+      - if:
+          condition:
+            lambda: return state > 0;
+          else:
+            - if:
+                condition:
+                  switch.is_on: status_led_switch
+                then:
+                  switch.turn_off: status_led_switch
+          then:
+            - if:
+                condition:
+                  switch.is_off: status_led_switch
+                then:
+                  switch.turn_on: status_led_switch
+
+script:
+  - id: fan_speed_led
+    mode: restart
+    then:
+      - lambda: |-
+          if (!id(fan_device).state) {
+            id(led).turn_off().perform();
+            return;
+          }
+          int fan_speed = id(fan_device).speed;
+          float red = fan_speed / 100.0;
+          float green = (100 - fan_speed) / 100.0;
+          auto led_call = id(led).turn_on();
+          led_call.set_brightness(1.0);
+          led_call.set_transition_length(0);
+          led_call.set_rgb(red, green, 0.0);
+          led_call.perform();
+      - script.execute: delay_led_off
+  - id: delay_led_off
+    mode: restart
+    then:
+      - delay: 10s
+      - light.turn_off: led
+
+sensor:
+  - id: dial
+    internal: true
+    on_anticlockwise:
+      - lambda: |-
+          int fan_speed = id(fan_device).speed - 1;
+          if (fan_speed < 0) {
+            return;
+          }
+          if (fan_speed < 1) {
+            auto call = id(fan_device).turn_off();
+            call.perform();
+            return;
+          }
+          auto call = id(fan_device).turn_on();
+          call.set_speed(fan_speed);
+          call.perform();
+      - script.execute: fan_speed_led
+    on_clockwise:
+      - lambda: |-
+          int fan_speed = id(fan_device).speed + 1;
+          if (fan_speed > 100) {
+            return;
+          }
+          auto call = id(fan_device).turn_on();
+          call.set_speed(fan_speed);
+          call.perform();
+      - script.execute: fan_speed_led
+    pin_a: GPIO22
+    pin_b: GPIO23
+    platform: rotary_encoder
+
+spi:
+  clk_pin: GPIO19
+  mosi_pin: GPIO20
+
+switch:
+  - id: status_led_switch
+    on_turn_off:
+      - light.turn_off:
+          id: led
+          transition_length: 0ms
+    on_turn_on:
+      - light.turn_on:
+          blue: 100%
+          brightness: 100%
+          green: 0%
+          id: led
+          red: 100%
+          transition_length: 0ms
+    optimistic: true
+    platform: template
