@@ -1,0 +1,56 @@
+binary_sensor:
+  - name: Reset Button
+    pin:
+      inverted: true
+      number: GPIO33
+    platform: gpio
+
+button:
+  - entity_category: diagnostic
+    name: Safe Mode Boot
+    platform: safe_mode
+
+esp32:
+  board: esp32doit-devkit-v1
+  framework:
+    type: esp-idf
+
+esphome:
+  on_boot:
+    then:
+      - output.turn_on: power_led
+
+ethernet:
+  clk:
+    mode: CLK_EXT_IN
+    pin:
+      ignore_strapping_warning: true
+      number: GPIO0
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  phy_addr: 1
+  power_pin:
+    ignore_strapping_warning: true
+    number: GPIO5
+  type: IP101
+
+output:
+  - id: power_led
+    inverted: true
+    pin: GPIO14
+    platform: gpio
+  - id: bluetooth_led
+    inverted: true
+    pin:
+      ignore_strapping_warning: true
+      number: GPIO12
+    platform: gpio
+
+packages:
+  base: !include base.yaml
+  ethernet: !include ethernet.yaml
+
+status_led:
+  pin:
+    inverted: true
+    number: GPIO32

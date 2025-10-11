@@ -1,5 +1,5 @@
 packages:
-  atoms3_lite: !include configs/atoms3_lite.yaml
+  gl_s10: !include configs/gl_s10.yaml
   landing_iam_t1: !include
     file: configs/inkbird_iam_t1.yaml
     vars:
@@ -16,9 +16,9 @@ packages:
       sub_device_name: iam_t1_main_bedroom
 
 substitutions:
-  name: co2-relay
   friendly_name: CO2 Relay
-  ip_address: 10.1.1.244
+  ip_address: 10.1.1.226
+  name: co2-relay
 
 esphome:
   areas:
