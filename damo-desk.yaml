@@ -1,0 +1,16 @@
+packages:
+  c6: !include configs/c6.yaml
+  static_ip: !include configs/static-ip.yaml
+  desk: !include configs/desk.yaml
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components:
+      - loctek_height_sensor
+
+substitutions:
+  friendly_name: Damo Desk
+  ip_address: 10.1.1.193
+  name: damo-desk

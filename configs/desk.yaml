@@ -1,0 +1,10 @@
+uart:
+  - id: desk_uart
+    baud_rate: 9600
+    rx_pin: GPIO18
+    tx_pin: GPIO20
+
+sensor:
+  - platform: loctek_height_sensor
+    id: desk_height
+    name: Desk Height
