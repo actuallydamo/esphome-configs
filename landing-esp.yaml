@@ -1,0 +1,8 @@
+packages:
+  atoms3_lite: !include configs/atoms3_lite.yaml
+  static_ip: !include configs/static-ip.yaml
+
+substitutions:
+  name: landing-esp
+  friendly_name: Landing ESP
+  ip_address: 10.1.1.244

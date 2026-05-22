@@ -1,11 +1,12 @@
 packages:
   atoms3_lite: !include configs/atoms3_lite.yaml
+  static_ip: !include configs/static-ip.yaml
 
 substitutions:
   friendly_name: Bedometer
   ip_address: 10.1.1.213
   name: bedometer
-  threshold: 0.5
+  threshold: 1.75
 
 ads1115:
   - address: 0x48
@@ -42,7 +43,10 @@ i2c:
   - &base_pressure_sensor
     entity_category: diagnostic
     filters:
-      - lambda: 'return x <= 0.1 ? 0.0 : x;'
+      - lambda: |-
+          if (x > 2.0) return 3.0;
+          if (x < 1.5) return 0.0;
+          return x;
       - or:
           - heartbeat: 1min
           - delta: 0.1
