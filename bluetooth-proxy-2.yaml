@@ -1,0 +1,10 @@
+esphome:
+
+packages:
+  seeed-esp32-poe: !include configs/seeed-esp32-poe.yaml
+  static_ip: !include configs/static-ip-eth.yaml
+
+substitutions:
+  friendly_name: Bluetooth Proxy 2
+  ip_address: 10.1.1.118
+  name: bluetooth-proxy-2

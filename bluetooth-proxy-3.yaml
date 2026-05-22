@@ -1,0 +1,28 @@
+esphome:
+  on_boot:
+    priority: -100
+    then:
+      - if:
+          condition:
+            ethernet.connected:
+          then:
+            - wifi.disable
+
+packages:
+  seeed-esp32-poe: !include configs/seeed-esp32-poe.yaml
+  wifi: !include configs/wifi.yaml
+
+substitutions:
+  friendly_name: Bluetooth Proxy 3
+  name: bluetooth-proxy-3
+
+interval:
+  - interval: 15s
+    then:
+      - if:
+          condition:
+            ethernet.connected:
+          then:
+            - wifi.disable
+          else:
+            - wifi.enable

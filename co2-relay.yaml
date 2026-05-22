@@ -1,5 +1,6 @@
 packages:
   gl_s10: !include configs/gl_s10.yaml
+  static_ip: !include configs/static-ip-eth.yaml
   landing_iam_t1: !include
     file: configs/inkbird_iam_t1.yaml
     vars:

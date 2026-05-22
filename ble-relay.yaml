@@ -1,0 +1,27 @@
+packages:
+  c6: !include configs/c6.yaml
+  static_ip: !include configs/static-ip.yaml
+
+substitutions:
+  friendly_name: BLE Relay
+  ip_address: 10.1.1.227
+  name: ble-relay
+
+esphome:
+  areas:
+    - id: landing_area
+      name: Landing
+    - id: main_bedroom_area
+      name: Main Bedroom
+    - id: office_area
+      name: Office
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true
+  connection_slots: 3
