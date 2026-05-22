@@ -28,6 +28,17 @@ if ! command -v difft &>/dev/null; then
   exit 1
 fi
 
+# Ensure GitHub CLI is available and authenticated
+if ! command -v gh &>/dev/null; then
+  echo "GitHub CLI (gh) is not installed."
+  exit 1
+fi
+
+if ! gh auth status --hostname github.com >/dev/null 2>&1; then
+  echo "GitHub CLI is not authenticated. Run 'gh auth login' to authenticate."
+  exit 1
+fi
+
 cleanup() {
   rm -rf "$TEMP_DIR"
 }
@@ -37,7 +48,13 @@ touch "$BASE_AC"
 
 echo "=== Checking latest release on GitHub ==="
 
-tag="$(curl -s https://api.github.com/repos/ginkage/MHI-AC-Ctrl-ESPHome/releases/latest | jq -r '.tag_name')"
+# Use GitHub CLI to get the latest release tag
+tag="$(gh release view --repo ginkage/MHI-AC-Ctrl-ESPHome --json tagName -q .tagName 2>/dev/null || true)"
+
+if [[ -z "$tag" ]]; then
+  echo "Failed to determine latest release tag via 'gh'."
+  exit 1
+fi
 
 if [[ -f "$MHI_VERSION_FILE" ]]; then
   local_version="$(cat "$MHI_VERSION_FILE")"
@@ -55,17 +72,29 @@ fi
 echo "=== Fetching YAML files from GitHub ==="
 
 echo "Fetching full.yaml..."
-curl -s "https://raw.githubusercontent.com/ginkage/MHI-AC-Ctrl-ESPHome/$tag/examples/full.yaml" >"$FETCH_FULL"
+if ! gh api -H "Accept: application/vnd.github.raw" "/repos/ginkage/MHI-AC-Ctrl-ESPHome/contents/examples/full.yaml?ref=$tag" >"$FETCH_FULL"; then
+  echo "Failed to fetch full.yaml for tag $tag"
+  exit 1
+fi
 
 echo "Fetching simple-energy-measurement.yaml..."
-curl -s "https://raw.githubusercontent.com/ginkage/MHI-AC-Ctrl-ESPHome/$tag/examples/simple-energy-measurement.yaml" >"$FETCH_ENERGY"
+if ! gh api -H "Accept: application/vnd.github.raw" "/repos/ginkage/MHI-AC-Ctrl-ESPHome/contents/examples/simple-energy-measurement.yaml?ref=$tag" >"$FETCH_ENERGY"; then
+  echo "Failed to fetch simple-energy-measurement.yaml for tag $tag"
+  exit 1
+fi
 
 if [[ -f "$MHI_VERSION_FILE" ]]; then
   echo "Fetching previous tag full.yaml..."
-  curl -s "https://raw.githubusercontent.com/ginkage/MHI-AC-Ctrl-ESPHome/$local_version/examples/full.yaml" >"$PREVIOUS_FULL"
+  if ! gh api -H "Accept: application/vnd.github.raw" "/repos/ginkage/MHI-AC-Ctrl-ESPHome/contents/examples/full.yaml?ref=$local_version" >"$PREVIOUS_FULL"; then
+    echo "Failed to fetch previous full.yaml for tag $local_version"
+    exit 1
+  fi
 
   echo "Fetching previous tag simple-energy-measurement.yaml..."
-  curl -s "https://raw.githubusercontent.com/ginkage/MHI-AC-Ctrl-ESPHome/$local_version/examples/simple-energy-measurement.yaml" >"$PREVIOUS_ENERGY"
+  if ! gh api -H "Accept: application/vnd.github.raw" "/repos/ginkage/MHI-AC-Ctrl-ESPHome/contents/examples/simple-energy-measurement.yaml?ref=$local_version" >"$PREVIOUS_ENERGY"; then
+    echo "Failed to fetch previous simple-energy-measurement.yaml for tag $local_version"
+    exit 1
+  fi
 
   echo ""
   echo "=== Checking diff between versions ==="
@@ -145,6 +174,8 @@ echo "=== Validating config ==="
 mkdir -p "$TEMP_DIR/configs"
 cp "$MERGED" "$TEMP_DIR/configs/base.ac.yaml"
 cp "$CONFIG_DIR/base.yaml" "$TEMP_DIR/configs/"
+cp "$CONFIG_DIR/d1_mini.yaml" "$TEMP_DIR/configs/"
+cp "$CONFIG_DIR/wifi.yaml" "$TEMP_DIR/configs/"
 cp {secrets.yaml,office-ac.yaml} "$TEMP_DIR"
 docker pull ghcr.io/esphome/esphome
 docker run --rm --user "$(id -u):$(id -g)" -v "$TEMP_DIR":/config -v "/dev/shm/cache:/cache" -it ghcr.io/esphome/esphome config "office-ac.yaml"

@@ -1,6 +1,7 @@
 packages:
   ac: !include configs/base.ac.yaml
   d1_mini: !include configs/d1_mini.yaml
+  static_ip: !include configs/static-ip.yaml
 
 substitutions:
   friendly_name: Matt Bedroom AC

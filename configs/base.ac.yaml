@@ -1,5 +1,5 @@
 
-# Version 4.2
+# Version 4.3.1
 
 MhiAcCtrl:
   # Only 20 (legacy) or 33 (includes 3D auto and vertical vanes) possible.
@@ -29,7 +29,7 @@ climate:
     visual:
       temperature_step:
         current_temperature: 0.1
-        target_temperature: 0.5
+        target_temperature: 1
     visual_min_temperature: 17.0
 
 esp8266:
@@ -43,7 +43,15 @@ esphome:
 external_components:
   - components:
       - MhiAcCtrl
-    source: github://ginkage/MHI-AC-Ctrl-ESPHome@v4.2
+    source: github://ginkage/MHI-AC-Ctrl-ESPHome@v4.3.1
+api:
+  services:
+    - service: set_grid_voltage
+      variables:
+        voltage: int
+      then:
+        - lambda: |-
+            id(grid_voltage) = voltage;
 globals:
   - id: grid_voltage
     initial_value: "247"
@@ -110,7 +118,7 @@ sensor:
     return_air_temperature:
       name: Return air temperature
     vanesLR_pos:
-      name: Vanes Left/Right
+      name: Vanes Left-Right
     vanes_pos:
       name: Vanes
   - platform: template
@@ -118,15 +126,33 @@ sensor:
     id: power
     name: MHI - Current Power
     unit_of_measurement: W
+    device_class: power
+    state_class: measurement
+    update_interval: 60s
+    accuracy_decimals: 0
+    lambda: |-
+      return id(ac_current_power).state * id(grid_voltage);
+  - platform: template
+    id: grid_voltage_sensor
+    name: Grid Voltage
+    unit_of_measurement: V
+    accuracy_decimals: 0
+    lambda: |-
+      return (float)id(grid_voltage);
   - platform: total_daily_energy
+    accuracy_decimals: 3
+    device_class: energy
     filters:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
-      - throttle: 300s
+      - or:
+        - throttle: 60s
+        - delta: 0.005
     icon: mdi:lightning-bolt
     method: left
     name: MHI - Daily Energy
     power_id: power
+    state_class: total_increasing
     unit_of_measurement: kWh
   - platform: wifi_signal
     name: WiFi Signal
@@ -154,3 +180,4 @@ text_sensor:
 time:
   - platform: homeassistant
     id: homeassistant_time
+    timezone: Australia/Melbourne
