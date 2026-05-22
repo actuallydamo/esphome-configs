@@ -1,6 +1,6 @@
 packages:
-  base: !include configs/base.yaml
   c6: !include configs/c6.yaml
+  static_ip: !include configs/static-ip.yaml
 
 substitutions:
   friendly_name: Wimdy
@@ -21,16 +21,17 @@ binary_sensor:
 
 external_components:
   - components:
-      - mcp414x
+      - mcp4xxx
     source:
       type: git
-      url: https://git.ellis.codes/e/esphome-mcp414x
+      url: https://git.ellis.codes/e/esphome-mcp4xxx.git
+      ref: main
 
 fan:
   - id: fan_device
-    mcp414x_id: digipot # References the MCP414X component
+    mcp4xxx_id: digipot # References the MCP414X component
     name: Fan
-    platform: mcp414x
+    platform: mcp4xxx
     speed_count: 100 # Number of speed levels (1-100)
 
 light:
@@ -49,7 +50,7 @@ logger:
   hardware_uart: UART0
   level: WARN
 
-mcp414x:
+mcp4xxx:
   - cs_pin: GPIO18
     id: digipot
     initial_value: 0
