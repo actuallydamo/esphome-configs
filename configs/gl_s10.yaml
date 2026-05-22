@@ -48,7 +48,6 @@ output:
 
 packages:
   base: !include base.yaml
-  ethernet: !include ethernet.yaml
 
 status_led:
   pin:

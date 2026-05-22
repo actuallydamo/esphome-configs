@@ -1,0 +1,31 @@
+bluetooth_proxy:
+  active: true
+  connection_slots: 4
+
+button:
+  - entity_category: diagnostic
+    name: Safe Mode Boot
+    platform: safe_mode
+
+esp32:
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+esp32_ble:
+  max_connections: 4
+
+esp32_ble_tracker:
+
+esphome:
+
+ethernet:
+  clk_pin: GPIO7
+  cs_pin: GPIO2
+  interrupt_pin: GPIO10
+  miso_pin: GPIO8
+  mosi_pin: GPIO9
+  type: W5500
+
+packages:
+  base: !include base.yaml

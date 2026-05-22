@@ -1,0 +1,6 @@
+wifi:
+  manual_ip:
+    dns1: 10.1.1.209
+    gateway: 10.1.1.1
+    static_ip: $ip_address
+    subnet: 255.255.255.0

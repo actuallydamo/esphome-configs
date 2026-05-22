@@ -6,6 +6,9 @@ wifi:
   ap:
     password: !secret fallback_psk
     ssid: $fallback_name
-  manual_ip: $manual_ip
+  min_auth_mode: WPA2
   password: !secret psk
   ssid: !secret ssid
+
+# Enable fallback captive portal when WiFi fails
+captive_portal:
