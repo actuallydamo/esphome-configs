@@ -1,5 +1,5 @@
 packages:
-  atoms3_lite: !include configs/atoms3_lite.yaml
+  atoms3_lite: !include configs/c6.yaml
   static_ip: !include configs/static-ip.yaml
 
 substitutions:
@@ -7,9 +7,6 @@ substitutions:
   ip_address: 10.1.1.213
   name: bedometer
   threshold: 1.75
-
-ads1115:
-  - address: 0x48
 
 .binary_sensor:
   - &base_occupancy_sensor
@@ -34,11 +31,6 @@ binary_sensor:
     lambda: return id(bed_left_occupancy).state || id(bed_right_occupancy).state;
     name: Bed Occupancy
 
-i2c:
-  id: i2c_bus
-  scl: GPIO6
-  sda: GPIO5
-
 .sensor:
   - &base_pressure_sensor
     entity_category: diagnostic
@@ -50,16 +42,16 @@ i2c:
       - or:
           - heartbeat: 1min
           - delta: 0.1
-    gain: 4.096
-    platform: ads1115
+    attenuation: 12db
+    platform: adc
     update_interval: 1s
 
 sensor:
   - !!merge <<: *base_pressure_sensor
     id: bed_left_pressure
-    multiplexer: A0_GND
+    pin: GPIO0
     name: Left
   - !!merge <<: *base_pressure_sensor
     id: bed_right_pressure
-    multiplexer: A1_GND
+    pin: GPIO1
     name: Right
